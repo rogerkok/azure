@@ -1,0 +1,47 @@
+{
+    "properties": {
+        "displayName": "Audit des Locks sur les Groupes de ressources selon un Tag",
+        "description": "Audits l'ensemble des Groupes de ressources, selon le Tag appliqué, afin de vérifier le lock CanNotDelete.",
+        "mode": "All",
+        "parameters": {
+            "tagName": {
+              "type": "String",
+              "metadata": {
+                "displayName": "Nom du Tag",
+                "description": "Le nom du Tag a auditer"
+              }
+            },
+            "tagValue": {
+              "type": "String",
+              "metadata": {
+                "displayName": "Valeur du Tag",
+                "description": "La valeur du Tag a auditer"
+              }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+                    },
+                    {
+                        "field": "[concat('tags[', parameters('tagName'), ']')]",
+                        "equals": "[parameters('tagValue')]"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "auditIfNotExists",
+                "details": {
+                    "type": "Microsoft.Authorization/locks",
+                    "existenceCondition": {
+                        "field": "Microsoft.Authorization/locks/level",
+                        "equals": "CanNotDelete"
+                    }
+                }
+            }
+        }
+    }
+}
